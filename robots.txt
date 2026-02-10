@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://my-personality-test-d.github.io/sitemap.xml
