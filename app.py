@@ -17,6 +17,12 @@ PATH_PREFIX = "/download"
 # Checks if a link like /blog/news points to a file /blog/news.html and updates the link.
 FIX_MISSING_HTML_EXTENSION = True
 
+# 4. Fix empty links in buttons
+# List of button IDs that should have empty links replaced with get/index.html
+FIX_EMPTY_BUTTON_LINKS = True
+BUTTON_IDS_TO_FIX = ['headmenusupper', 'mainheadbutt', 'maindwnldbutt']
+EMPTY_LINK_REPLACEMENT = "/download/get/index.html"
+
 # Extra replacements (typos, etc.)
 EXTRA_REPLACEMENTS = []
 # ---------------------
@@ -130,6 +136,16 @@ def process_content(content, root_dir):
 
         content = re.sub(r'href=(["\'])(.*?)\1', fix_html_link, content)
 
+    # 4. Fix empty links in buttons
+    if FIX_EMPTY_BUTTON_LINKS:
+        # For each button ID, replace href="#" with the replacement link
+        for button_id in BUTTON_IDS_TO_FIX:
+            # Pattern: <a href="#" id="button_id">
+            # We need to be careful to match the exact pattern
+            pattern = rf'(<a\s+href=")#(".*?id="{re.escape(button_id)}")'
+            replacement = rf'\1{EMPTY_LINK_REPLACEMENT}\2'
+            content = re.sub(pattern, replacement, content, flags=re.IGNORECASE | re.DOTALL)
+
     return content
 
 def main():
@@ -141,7 +157,9 @@ def main():
     print(f"Prefixing root-relative paths with '{PATH_PREFIX}'")
     if FIX_MISSING_HTML_EXTENSION:
         print("Fixing missing .html extensions in internal links")
-
+    if FIX_EMPTY_BUTTON_LINKS:
+        print(f"Fixing empty links in buttons: {BUTTON_IDS_TO_FIX}")
+        print(f"Replacing empty links with: {EMPTY_LINK_REPLACEMENT}")
     processed_count = 0
     modified_count = 0
 
